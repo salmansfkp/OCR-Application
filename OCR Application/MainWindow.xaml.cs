@@ -30,7 +30,7 @@ namespace OCR_Application
             Top = SystemParameters.PrimaryScreenHeight - Height - 20;
 
             // Attach MouseLeftButtonDown to the button
-            FloatingButton.PreviewMouseLeftButtonDown += (s, e) =>
+            FloatingButton.MouseLeftButtonDown += (s, e) =>
             {
                 e.Handled = true; // Prevent Click event interference
                 DragMove();
@@ -110,7 +110,7 @@ namespace OCR_Application
                         // Debug: Log coordinates
                         System.Diagnostics.Debug.WriteLine($"Adjusted Rect: X={rect.X}, Y={rect.Y}, Width={rect.Width}, Height={rect.Height}");
                         string extractedText = await ExtractTextFromScreenRegion(rect);
-                        MessageBox.Show(extractedText, "Extracted Text");
+                        ShowCopyableTextWindow(extractedText);
                     }
                     catch (Exception ex)
                     {
@@ -152,7 +152,51 @@ namespace OCR_Application
                 }
             }
         }
+        private void ShowCopyableTextWindow(string text)
+        {
+            var textWindow = new Window
+            {
+                Title = "Extracted Text",
+                Width = 400,
+                Height = 300,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                ResizeMode = ResizeMode.CanResize
+            };
 
+            var grid = new Grid();
+            var textBox = new TextBox
+            {
+                Text = text,
+                IsReadOnly = false,
+                AcceptsReturn = true,
+                AcceptsTab = true,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                Margin = new Thickness(10)
+            };
+            var copyButton = new Button
+            {
+                Content = "Copy to Clipboard",
+                Width = 120,
+                Height = 30,
+                Margin = new Thickness(10),
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+            copyButton.Click += (s, e) =>
+            {
+                if (!string.IsNullOrEmpty(textBox.Text))
+                {
+                    Clipboard.SetText(textBox.Text);
+                    MessageBox.Show("Text copied to clipboard!", "Success");
+                }
+            };
+
+            grid.Children.Add(textBox);
+            grid.Children.Add(copyButton);
+            textWindow.Content = grid;
+            textWindow.ShowDialog();
+        }
         // P/Invoke for dragging the window
         [DllImport("user32.dll")]
         private static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
