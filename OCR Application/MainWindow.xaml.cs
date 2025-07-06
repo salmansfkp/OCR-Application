@@ -30,7 +30,7 @@ namespace OCR_Application
             Top = SystemParameters.PrimaryScreenHeight - Height - 20;
 
             // Attach MouseLeftButtonDown to the button
-            FloatingButton.MouseLeftButtonDown += (s, e) =>
+            FloatingButton.PreviewMouseLeftButtonDown += (s, e) =>
             {
                 e.Handled = true; // Prevent Click event interference
                 DragMove();
